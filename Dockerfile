@@ -9,6 +9,9 @@ LABEL maintainer="getlaminas.org" \
 ## Update package information
 RUN apt-get update
 
+## Install unzip for better archive handling
+RUN apt-get install --yes unzip
+
 ## Configure Apache
 RUN a2enmod rewrite \
     && sed -i 's!/var/www/html!/var/www/public!g' /etc/apache2/sites-available/000-default.conf \
@@ -16,7 +19,7 @@ RUN a2enmod rewrite \
 
 ## Install Composer
 RUN curl -sS https://getcomposer.org/installer \
-  | php -- --install-dir=/usr/local/bin --filename=composer
+    | php -- --install-dir=/usr/local/bin --filename=composer
 
 ###
 ## PHP Extensisons
@@ -31,6 +34,15 @@ RUN apt-get install --yes libicu-dev \
     && docker-php-ext-configure intl \
     && docker-php-ext-install intl
 
+## Install SOAP extension
+RUN apt-get install --yes libxml2-dev \
+    && docker-php-ext-install soap
+
+## Install GD extension
+RUN apt-get install --yes libfreetype6-dev libjpeg62-turbo-dev libpng-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd
+
 ###
 ## Optional PHP extensions 
 ###
@@ -43,7 +55,7 @@ RUN apt-get install --yes libicu-dev \
 ###
 
 ## MySQL PDO support
-# RUN docker-php-ext-install pdo_mysql
+RUN docker-php-ext-install pdo_mysql
 
 ## PostgreSQL PDO support
 # RUN apt-get install --yes libpq-dev \

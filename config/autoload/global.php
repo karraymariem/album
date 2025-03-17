@@ -1,14 +1,41 @@
+
 <?php
 
+/**
+ * Global Configuration Override
+ *
+ * You can use this file for overriding configuration values from modules, etc.
+ * You would place values in here that are agnostic to the environment and not
+ * sensitive to security.
+ *
+ * NOTE: In practice, this file will typically be INCLUDED in your source
+ * control, so do not include passwords or other sensitive information in this
+ * file.
+ */
+
+use Laminas\Db\Adapter;
 
 return [
-    'db' => [
-        'driver'   => 'Pdo_Mysql',  // Use the MySQL PDO driver
-        'database' => 'laminastutorial',  // Your MySQL database name
-        'username' => 'root',  // Default MySQL username in XAMPP
-        'password' => '',  // Default password in XAMPP (leave empty)
-        'hostname' => 'localhost',  // MySQL runs locally in XAMPP
-        'port'     => '3306',  // Default MySQL port
-        'charset'  => 'utf8', // Optional but recommended
-    ],
+	'service_manager' => [
+		'abstract_factories' => [
+			Adapter\AdapterAbstractServiceFactory::class
+		],
+		'factories' => [
+			Adapter\AdapterInterface::class => Adapter\AdapterServiceFactory::class,
+		],
+		'aliases' => [
+			Adapter\Adapter::class => Adapter\AdapterInterface::class
+		]
+	],
+
+	'db' => [
+		'driver' => 'Pdo',
+		'dsn' => 'mysql:dbname=test_db;host=db',
+
+		'username' => 'root',  # change this to match your database's username 
+		'password' => 'password',      # change this to match your database's password
+		'driver_options' => [
+			PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''
+		]
+	]
 ];
