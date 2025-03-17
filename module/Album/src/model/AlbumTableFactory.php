@@ -9,13 +9,13 @@ use Psr\Container\ContainerInterface;
 
 class AlbumTableFactory implements FactoryInterface
 {
+
     public function __invoke(ContainerInterface $container, $requestedName, ?array $options = null): AlbumTable
     {
         $dbAdapter = $container->get(AdapterInterface::class);
-        $resultSetPrototype = new ResultSet(); // No ArrayObjectPrototype set
-
+        $resultSetPrototype = new ResultSet();
+        $resultSetPrototype->setArrayObjectPrototype(new Album());
         $tableGateway = new TableGateway('album', $dbAdapter, null, $resultSetPrototype);
-
         return new AlbumTable($tableGateway);
     }
 }

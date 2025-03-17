@@ -1,23 +1,21 @@
 <?php 
-namespace Album\Controller\Factory;
+namespace Album\Model;
 
-use Psr\Container\ContainerInterface;
+use Laminas\Db\Adapter\AdapterInterface;
+use Laminas\Db\ResultSet\ResultSet;
+use Laminas\Db\TableGateway\TableGateway;
 use Laminas\ServiceManager\Factory\FactoryInterface;
-use Album\Controller\AlbumController;
-use Album\Model\AlbumTable;
+use Psr\Container\ContainerInterface;
 
-class AlbumControllerFactory implements FactoryInterface
+class AlbumTableFactory implements FactoryInterface
 {
-    public function __invoke(ContainerInterface $container, $requestedName, ?array $options = null)
+
+    public function __invoke(ContainerInterface $container, $requestedName, ?array $options = null): AlbumTable
     {
-        // Get the AlbumTable service from the container
-        $albumTable = $container->get(AlbumTable::class);
-
-        // Create a new instance of AlbumController
-        $controller = new AlbumController();
-        $controller->setAlbumTable($albumTable); // Set the albumTable via setter
-
-        // Return the controller
-        return $controller;
+        $dbAdapter = $container->get(AdapterInterface::class);
+        $resultSetPrototype = new ResultSet();
+        $resultSetPrototype->setArrayObjectPrototype(new Album());
+        $tableGateway = new TableGateway('album', $dbAdapter, null, $resultSetPrototype);
+        return new AlbumTable($tableGateway);
     }
 }

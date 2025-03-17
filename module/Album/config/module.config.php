@@ -1,75 +1,37 @@
 <?php
 namespace Album;
-
-use Album\Model\AlbumTable;  // Added the correct use statement
-
+use Album\Model\AlbumTableFactory;
+use Laminas\ServiceManager\Factory\InvokableFactory;
+use Laminas\Router\Http\Segment;
+use Laminas\ServiceManager\AbstractFactory\ReflectionBasedAbstractFactory;
 return [
     'controllers' => [
-
-    
         'factories' => [
-            Controller\AlbumController::class => function ($container) {
-                $controller = new Controller\AlbumController();
-                $albumTable = $container->get(AlbumTable::class);  // Corrected to use the fully qualified name
-                $controller->setAlbumTable($albumTable); // Inject AlbumTable
-                return $controller;
-            },
+            Controller\AlbumController::class => ReflectionBasedAbstractFactory::class
         ],
     ],
     'router' => [
         'routes' => [
             'album' => [
-                'type'    => 'Literal',
+                'type'    => Segment::class,
                 'options' => [
-                    'route'    => '/album',
+                    'route' => '/album[/:action[/:id]]',
+                    'constraints' => [
+                        'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
+                        'id'     => '[0-9]+',
+                    ],
                     'defaults' => [
                         'controller' => Controller\AlbumController::class,
                         'action'     => 'index',
                     ],
                 ],
-                'may_terminate' => true,
-                'child_routes'  => [
-                    'add' => [
-                        'type'    => 'Literal',
-                        'options' => [
-                            'route'    => '/add',
-                            'defaults' => [
-                                'controller' => Controller\AlbumController::class,
-                                'action'     => 'add',
-                            ],
-                        ],
-                    ],
-                    'edit' => [
-                        'type'    => 'Segment',
-                        'options' => [
-                            'route'    => '/edit[/:id]',
-                            'defaults' => [
-                                'controller' => Controller\AlbumController::class,
-                                'action'     => 'edit',
-                            ],
-                        ],
-                    ],
-                    'delete' => [
-                        'type'    => 'Segment',
-                        'options' => [
-                            'route'    => '/delete[/:id]',
-                            'defaults' => [
-                                'controller' => Controller\AlbumController::class,
-                                'action'     => 'delete',
-                            ],
-                        ],
-                    ],
-                ],
             ],
         ],
     ],
+
     'view_manager' => [
-        'template_map' => [
-            // Map the view to the correct file path
-            'album/album/index' => __DIR__ . '/../view/album/album/index.phtml',
-        ],
         'template_path_stack' => [
-            'album' => __DIR__ . '/../view',  // The default path to your Album module's views
+            'album' => __DIR__ . '/../view',
         ],
     ],
 ];
