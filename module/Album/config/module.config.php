@@ -1,15 +1,23 @@
 <?php
+
 namespace Album;
+
+use Album\Controller\AlbumController;
+use Album\Model\AlbumTable;
 use Album\Model\AlbumTableFactory;
-use Laminas\ServiceManager\Factory\InvokableFactory;
 use Laminas\Router\Http\Segment;
+use Laminas\ServiceManager\Factory\InvokableFactory;
 use Laminas\ServiceManager\AbstractFactory\ReflectionBasedAbstractFactory;
+
 return [
+    // Controllers configuration
     'controllers' => [
         'factories' => [
-            Controller\AlbumController::class => ReflectionBasedAbstractFactory::class
+            AlbumController::class => ReflectionBasedAbstractFactory::class,
         ],
     ],
+
+    // Routing configuration
     'router' => [
         'routes' => [
             'album' => [
@@ -21,7 +29,7 @@ return [
                         'id'     => '[0-9]+',
                     ],
                     'defaults' => [
-                        'controller' => Controller\AlbumController::class,
+                        'controller' => AlbumController::class,
                         'action'     => 'index',
                     ],
                 ],
@@ -29,9 +37,17 @@ return [
         ],
     ],
 
+    // View configuration
     'view_manager' => [
         'template_path_stack' => [
             'album' => __DIR__ . '/../view',
+        ],
+    ],
+
+    // Service manager configuration
+    'service_manager' => [
+        'factories' => [
+            AlbumTable::class => AlbumTableFactory::class,
         ],
     ],
 ];

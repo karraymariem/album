@@ -1,5 +1,4 @@
 <?php
-
 namespace Album;
 
 use Laminas\ModuleManager\Feature\ConfigProviderInterface;
