@@ -1,7 +1,7 @@
 <?php
+
 namespace Album\Model;
 
-use RuntimeException;
 use Laminas\Db\TableGateway\TableGatewayInterface;
 
 class AlbumTable
@@ -13,54 +13,40 @@ class AlbumTable
         $this->tableGateway = $tableGateway;
     }
 
+    // Fetch all albums
     public function fetchAll()
     {
         return $this->tableGateway->select();
     }
 
-    public function getAlbum($id)
+    // Fetch a single album by its code
+    public function getAlbum($code)
     {
-        $id = (int) $id;
-        $rowset = $this->tableGateway->select(['id' => $id]);
-        $row = $rowset->current();
-        if (! $row) {
-            throw new RuntimeException(sprintf(
-                'Could not find row with identifier %d',
-                $id
-            ));
-        }
-
-        return $row;
+        $result = $this->tableGateway->select(['code' => $code]);
+        return $result->current();
     }
 
-    public function saveAlbum(Album $album)
+    // Insert a new album
+    public function saveAlbum($data)
     {
-        $data = [
-            'artist' => $album->artist,
-            'title'  => $album->title,
+        $albumData = [
+            'code' => $data['code'],
+            'designation' => $data['designation'],
+            'cadence' => $data['cadence'],
+            'description' => $data['description']
         ];
 
-        $id = (int) $album->id;
-
-        if ($id === 0) {
-            $this->tableGateway->insert($data);
-            return;
-        }
-
         try {
-            $this->getAlbum($id);
-        } catch (RuntimeException $e) {
-            throw new RuntimeException(sprintf(
-                'Cannot update album with identifier %d; does not exist',
-                $id
-            ));
+            $this->tableGateway->insert($albumData);
+        } catch (\Exception $e) {
+            throw new \RuntimeException('Failed to insert album: ' . $e->getMessage());
         }
-
-        $this->tableGateway->update($data, ['id' => $id]);
     }
 
-    public function deleteAlbum($id)
+
+    // Delete an album by its code
+    public function deleteAlbum($code)
     {
-        $this->tableGateway->delete(['id' => (int) $id]);
+        $this->tableGateway->delete(['code' => $code]);
     }
 }

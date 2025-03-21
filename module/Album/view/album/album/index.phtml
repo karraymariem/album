@@ -1,28 +1,521 @@
-<?php
-// module/Album/view/album/album/index.phtml:
+    <button> <a href="#" id="instructionLink">Instruction</a></button>
 
-$title = 'My albums';
-$this->headTitle($title);
-?>
-<h1><?= $this->escapeHtml($title) ?></h1>
-<p>
-    <a href="<?= $this->url('album', ['action' => 'add']) ?>">Add new album</a>
-</p>
+    <div class="instruction-section" id="instructionSection">
+        <div class="instruction-header">
+            <h3><u> INSTRUCTIONS </u></h3>
 
-<table class="table">
-<tr>
-    <th>Title</th>
-    <th>Artist</th>
-    <th>&nbsp;</th>
-</tr>
-<?php foreach ($albums as $album) : ?>
-    <tr>
-        <td><?= $this->escapeHtml($album->title) ?></td>
-        <td><?= $this->escapeHtml($album->artist) ?></td>
-        <td>
-            <a href="<?= $this->url('album', ['action' => 'edit', 'id' => $album->id]) ?>">Edit</a>
-            <a href="<?= $this->url('album', ['action' => 'delete', 'id' => $album->id]) ?>">Delete</a>
-        </td>
-    </tr>
-<?php endforeach; ?>
-</table>
+            <!-- Add a container for the buttons -->
+            <div class="button-container">
+                <button class="add-btn" id="openModalBtn">
+
+                    Ajouter
+                </button>
+                <button class="update-btn">
+
+                    Actualiser
+                </button>
+                <button class="export-btn">
+
+                    Exporter Excel
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th>Code</th>
+                        <th>Désignation</th>
+                        <th>Cadence</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($albums as $album): ?>
+                        <tr>
+                            <td><button class="voir-btn"><i class="fa fa-eye"></i></button></td>
+                            <td><button class="edit-btn"><i class="fa fa-pencil"></i></button></td>
+                            <td><button class="delete-btn"><i class="fa fa-trash"></i></button></td>
+                            <td><button class="immprimer-btn"><i class="fa fa-print"></i></button></td>
+                            <td><button class="dupliquer-btn"><i class="fa fa-clone"></i></button></td>
+                            <td><button> Details</button></td>
+                            <td><?= htmlspecialchars($album->code) ?></td>
+                            <td><?= htmlspecialchars($album->designation) ?></td>
+                            <td><?= htmlspecialchars($album->cadence) ?></td>
+                            <td><?= htmlspecialchars($album->description) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Ajouter</h3>
+            <hr />
+            <form id="addItemForm">
+                <div class="form-row">
+                    <div class="input-container" style="flex: 2">
+                        <label for="code">Code</label>
+                        <input type="text" id="code" name="code" required />
+                    </div>
+                    <div class="input-container" style="flex: 3">
+                        <label for="designation">Désignation</label>
+                        <input type="text" id="designation" name="designation" required />
+                    </div>
+                </div>
+
+                <label for="post">Poste de charge</label>
+                <input type="text" id="post" name="post" required />
+
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="4"></textarea>
+
+                <div id="checkbox-group" class="checkbox-group-left">
+                    <div class="checkbox-label">
+                        <input type="checkbox" id="imprimer" name="imprimer" />
+                        <label for="imprimer">Imprimer</label>
+                    </div>
+                    <div class="checkbox-label">
+                        <input type="checkbox" id="interface" name="interface" />
+                        <label for="interface">Interface</label>
+                    </div>
+                </div>
+
+                <div class="modal-buttons">
+                    <button class="close" type="button" id="closeModalBtn">
+                        Annuler
+                    </button>
+                    <button type="submit">Valider</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+
+        .instruction-section h3 {
+            text-transform: uppercase;
+            display: inline-block;
+            margin-right: 20px;
+        }
+
+
+        .table-container {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-container th,
+        .table-container td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th:nth-child(1),
+        td:nth-child(1),
+        th:nth-child(2),
+        td:nth-child(2),
+        th:nth-child(3),
+        td:nth-child(3),
+        th:nth-child(4),
+        td:nth-child(4),
+        th:nth-child(5),
+        td:nth-child(5) {
+            width: 10px;
+        }
+
+        th:nth-child(6),
+        td:nth-child(6) {
+            width: 30px;
+        }
+
+        .table-container th {
+            background-color: #f8f4f4;
+            color: #707279;
+        }
+
+        .table-container td {
+            color: #292828;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            z-index: 1;
+            /*sit on to of the page*/
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+            align-items: center;
+            bottom: 0;
+            justify-content: center;
+            align-items: center;
+            display: none;
+            position: fixed;
+
+            bottom: 0;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 37%;
+            height: 75%;
+            overflow-y: scroll;
+            box-sizing: border-box;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input,
+        textarea {
+            width: 95%;
+            padding: 10px;
+            margin-bottom: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        #code {
+            width: 75%;
+        }
+
+        #designation {
+            width: 91%;
+        }
+
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 1px;
+        }
+
+        .form-row .input-container {
+            flex: 1;
+        }
+
+        button {
+            padding: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 2px;
+            border: 1px solid white;
+            background-color: #d4d2d3;
+            color: #292828;
+        }
+
+        button:hover {
+            background-color: #888;
+        }
+
+        .close {
+            background-color: #5a6061;
+            color: white;
+            border: none;
+        }
+
+        .modal button[type="submit"] {
+            background-color: #1c8ad9;
+            color: white;
+            border: 2px #1c8ad9;
+
+            border-radius: 2px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-left: 65%;
+        }
+
+        #checkbox-group {
+            padding: 15px;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        #checkbox-group div {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        #checkbox-group input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-group-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+        }
+
+        .instruction-header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .instruction-header h3 {
+            margin-right: 20px;
+            margin-left: 2px;
+        }
+
+        /*  the header buttons */
+        .button-container button {
+            background: none;
+            border: none;
+            color: #707279;
+            font-size: 16px;
+            padding: 0;
+            transform: translateY(-9px);
+            gap: 15px;
+        }
+
+        .button-container button:hover {
+            text-decoration: none;
+            color: #292828;
+        }
+
+        /* Styling for the container holding the buttons */
+        .button-container {
+            width: 300px;
+            height: 10px;
+            background-color: #f8f4f4;
+
+            display: flex;
+            /* Enable flexbox */
+            justify-content: space-between;
+            align-items: center;
+            /* Vertically center the items */
+            padding: 20px;
+            border: 5px;
+            font-size: 18px;
+            font-family: Arial, sans-serif;
+            margin-left: 0px;
+        }
+    </style>
+
+
+    <script>
+        // Initially hide the instruction section
+        document.getElementById("instructionSection").style.display = "none";
+
+        const dataTable = document
+            .getElementById("dataTable")
+            .getElementsByTagName("tbody")[0];
+        const myModal = document.getElementById("myModal");
+        const modalTitle = document.getElementById("modalTitle");
+        const addItemForm = document.getElementById("addItemForm");
+        const openModalBtn = document.getElementById("openModalBtn");
+        const closeModalBtn = document.getElementById("closeModalBtn");
+        const instructionLink = document.getElementById("instructionLink");
+        let editRow = null;
+
+        openModalBtn.addEventListener("click", () => {
+            myModal.style.display = "flex";
+            addItemForm.reset();
+            document.querySelector(
+                '.modal-buttons button[type="submit"]'
+            ).style.display = "block"; // Show Valider button
+        });
+
+        closeModalBtn.addEventListener("click", () => {
+            myModal.style.display = "none";
+        });
+
+        addItemForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            const code = document.getElementById("code").value;
+            const designation = document.getElementById("designation").value;
+            const post = document.getElementById("post").value;
+            const description = document.getElementById("description").value;
+
+            if (editRow) {
+                // Update existing row if editRow is set
+                editRow.cells[6].textContent = code;
+                editRow.cells[7].textContent = designation;
+                editRow.cells[9].textContent = description;
+
+                // Reset the editRow after update
+                editRow = null;
+            } else {
+                // Add a new row
+                const newRow = dataTable.insertRow();
+                newRow.innerHTML = ` 
+    <td><button class="voir-btn"><i class="fa fa-eye"></i></button></td>
+    <td><button class="edit-btn"><i class="fa fa-pencil"></i></button></td>
+    <td><button class="delete-btn"><i class="fa fa-trash"></i></button></td>
+    <td><button class="immprimer-btn"><i class="fa fa-print"></i></button></td>
+    <td><button class="dupliquer-btn"><i class="fa fa-clone"></i></button></td>
+    <td><button > Details</button></td>
+    <td>${code}</td>
+    <td>${designation}</td>
+    <td></td>
+    <td>${description}</td>
+    `;
+
+                newRow.querySelector(".delete-btn").addEventListener("click", () => {
+                    newRow.remove();
+                });
+
+                //EDIT BUTTON
+                newRow.querySelector(".edit-btn").addEventListener("click", () => {
+                    modalTitle.textContent = "Modifier";
+                    const cells = newRow.cells;
+                    document.getElementById("code").value = cells[6].textContent;
+                    document.getElementById("designation").value = cells[7].textContent;
+                    document.getElementById("description").value = cells[9].textContent;
+
+                    // Enable inputs for editing
+                    document.getElementById("code").disabled = false;
+                    document.getElementById("designation").disabled = false;
+                    document.getElementById("description").disabled = false;
+                    document.getElementById("post").disabled = false;
+
+                    document.querySelector(
+                        '.modal-buttons button[type="submit"]'
+                    ).style.display = "block"; // Show Valider button
+
+                    myModal.style.display = "flex";
+                    editRow = newRow; // Set the row for editing
+                });
+
+                // VOIR BUTTON
+                newRow.querySelector(".voir-btn").addEventListener("click", () => {
+                    modalTitle.textContent = "Voir";
+                    const cells = newRow.cells;
+                    document.getElementById("code").value = cells[6].textContent;
+                    document.getElementById("designation").value = cells[7].textContent;
+                    document.getElementById("description").value = cells[9].textContent;
+
+                    // Disable inputs for viewing only
+                    document.getElementById("code").disabled = true;
+                    document.getElementById("designation").disabled = true;
+                    document.getElementById("description").disabled = true;
+                    document.getElementById("post").disabled = true;
+
+                    // Hide the submit button for "Voir"
+                    document.querySelector(
+                        '.modal-buttons button[type="submit"]'
+                    ).style.display = "none";
+
+                    myModal.style.display = "flex";
+                });
+
+                // DUPLICATE BUTTON
+                newRow
+                    .querySelector(".dupliquer-btn")
+                    .addEventListener("click", () => {
+                        const clonedRow = newRow.cloneNode(true); // Clone the row
+                        dataTable.appendChild(clonedRow); // Append the cloned row to the table
+
+                        // You can add event listeners to the cloned buttons here if necessary
+                        clonedRow
+                            .querySelector(".delete-btn")
+                            .addEventListener("click", () => {
+                                clonedRow.remove();
+                            });
+
+                        clonedRow
+                            .querySelector(".edit-btn")
+                            .addEventListener("click", () => {
+                                modalTitle.textContent = "Modifier";
+                                const cells = clonedRow.cells;
+                                document.getElementById("code").value = cells[6].textContent;
+                                document.getElementById("designation").value =
+                                    cells[7].textContent;
+                                document.getElementById("description").value =
+                                    cells[9].textContent;
+
+                                // Enable inputs for editing
+                                document.getElementById("code").disabled = false;
+                                document.getElementById("designation").disabled = false;
+                                document.getElementById("description").disabled = false;
+                                document.getElementById("post").disabled = false;
+
+                                document.querySelector(
+                                    '.modal-buttons button[type="submit"]'
+                                ).style.display = "block"; // Show Valider button
+                                myModal.style.display = "block";
+                                editRow = clonedRow; // Set the row for editing
+                            });
+
+                        clonedRow
+                            .querySelector(".voir-btn")
+                            .addEventListener("click", () => {
+                                modalTitle.textContent = "Voir";
+                                const cells = clonedRow.cells;
+                                document.getElementById("code").value = cells[6].textContent;
+                                document.getElementById("designation").value =
+                                    cells[7].textContent;
+                                document.getElementById("description").value =
+                                    cells[9].textContent;
+
+                                // Disable inputs for viewing only
+                                document.getElementById("code").disabled = true;
+                                document.getElementById("designation").disabled = true;
+                                document.getElementById("description").disabled = true;
+                                document.getElementById("post").disabled = true;
+
+                                // Hide the submit button for "Voir"
+                                document.querySelector(
+                                    '.modal-buttons button[type="submit"]'
+                                ).style.display = "none";
+
+                                myModal.style.display = "block"; // Open the modal
+                            });
+                    });
+            }
+
+            myModal.style.display = "none";
+        });
+
+        instructionLink.addEventListener("click", () => {
+            document.getElementById("instructionSection").style.display = "block";
+        });
+    </script>

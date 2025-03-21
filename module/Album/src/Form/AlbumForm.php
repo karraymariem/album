@@ -18,18 +18,34 @@ class AlbumForm extends Form
         ]);
         
         $this->add([
-            'name' => 'title',
+            'name' => 'code',
             'type' => Text::class,
             'options' => [
-                'label' => 'Title',
+                'label' => 'Code',
             ],
         ]);
         
         $this->add([
-            'name' => 'artist',
+            'name' => 'designation',
             'type' => Text::class,
             'options' => [
-                'label' => 'Artist',
+                'label' => 'Designation',
+            ],
+        ]);
+        
+        $this->add([
+            'name' => 'cadence',
+            'type' => Text::class,
+            'options' => [
+                'label' => 'Cadence',
+            ],
+        ]);
+        
+        $this->add([
+            'name' => 'description',
+            'type' => Text::class,
+            'options' => [
+                'label' => 'Description',
             ],
         ]);
         
@@ -37,7 +53,7 @@ class AlbumForm extends Form
             'name' => 'submit',
             'type' => Submit::class,
             'attributes' => [
-                'value' => 'Go',
+                'value' => 'Ajouter',
                 'id'    => 'submitbutton',
             ],
         ]);

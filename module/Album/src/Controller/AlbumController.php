@@ -1,34 +1,57 @@
 <?php
+
 namespace Album\Controller;
 
+use Album\Form\AlbumForm;
+use Album\Model\Album;
+use Album\Model\AlbumTable;
 use Laminas\Mvc\Controller\AbstractActionController;
 use Laminas\View\Model\ViewModel;
-use Album\Model\AlbumTable;
+
 class AlbumController extends AbstractActionController
 {
-    private $table;
+    private $albumTable;
 
-    // Add this constructor:
-    public function __construct(AlbumTable $table)
+    public function __construct(AlbumTable $albumTable)
     {
-        $this->table = $table;
+        $this->albumTable = $albumTable;
     }
+
+    // Display all albums
     public function indexAction()
     {
+        $albums = $this->albumTable->fetchAll();
         return new ViewModel([
-            'albums' => $this->table->fetchAll(),
+            'albums' => $albums,
         ]);
     }
 
+    // Add a new album
     public function addAction()
     {
-    }
+        $request = $this->getRequest();
 
-    public function editAction()
-    {
-    }
+        // Check if it's an AJAX request
+        if ($request->isXmlHttpRequest()) {
+            $data = $request->getPost();  // Get form data from the POST request
 
-    public function deleteAction()
-    {
+            // Validate the data (you can add custom validation logic here if needed)
+
+            $album = new Album();
+            $album->exchangeArray($data);  // Fill the album model with form data
+
+            try {
+                $this->albumTable->saveAlbum($album);  // Save the album to the database
+                $response = ['success' => true, 'message' => 'Album added successfully.'];
+            } catch (\Exception $e) {
+                $response = ['success' => false, 'message' => 'Failed to add album.'];
+            }
+
+            // Return the response as JSON
+            return new \Laminas\View\Model\JsonModel($response);
+        }
+
+        // Fallback if it's not an AJAX request (you can add code here for normal rendering)
+        return new ViewModel();
     }
 }

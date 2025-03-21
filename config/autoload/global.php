@@ -4,7 +4,7 @@
 return [
     'db' => [
         'driver'   => 'Pdo_Mysql',  
-        'database' => 'laminas_db',  
+        'database' => 'try',  
         'username' => 'root',  
         'password' => '',  
         'hostname' => 'localhost',  
