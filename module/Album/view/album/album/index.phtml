@@ -7,14 +7,21 @@
             <!-- Add a container for the buttons -->
             <div class="button-container">
                 <button class="add-btn" id="openModalBtn">
+                    <img
+                        src="/img/actualiser.png" />
 
                     Ajouter
                 </button>
-                <form action="" method="get">
-                    <button type="submit">Actualiser</button>
-                </form>
-                <button class="export-btn">
 
+                <form action="" method="get">
+                    <button class="update-btn" type="submit">
+                        <img src="/img/actualiser.png" />
+                        Actualiser
+                    </button>
+                </form>
+
+                <button class="export-btn">
+                    <img src="/img/actualiser.png" />
                     Exporter Excel
                 </button>
             </div>
@@ -89,7 +96,7 @@
                         <label for="interface">Interface</label>
                     </div>
                 </div>
-
+                <hr />
                 <div class="modal-buttons">
                     <button class="close" type="button" id="closeModalBtn">
                         Annuler
@@ -299,45 +306,56 @@
             align-items: center;
             justify-content: flex-start;
             margin-bottom: 20px;
+
         }
 
         .instruction-header h3 {
             margin-right: 20px;
             margin-left: 2px;
+            transform: translateY(6px);
         }
 
-        /*  the header buttons */
+        .button-container {
+            width: 400px;
+            height: 40px;
+            background-color: #f8f4f4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            font-size: 18px;
+            font-family: Arial, sans-serif;
+        }
+
         .button-container button {
+            display: flex;
+            align-items: center;
             background: none;
             border: none;
             color: #707279;
             font-size: 16px;
-            padding: 0;
-            transform: translateY(-9px);
-            gap: 15px;
+            gap: 8px;
+            cursor: pointer;
+            padding: 5px 10px;
+            justify-content: center;
+            transform: translateY(-5px);
+
         }
 
         .button-container button:hover {
-            text-decoration: none;
             color: #292828;
         }
 
-        /* Styling for the container holding the buttons */
-        .button-container {
-            width: 300px;
-            height: 10px;
-            background-color: #f8f4f4;
+        .button-container button img {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+        }
 
-            display: flex;
-            /* Enable flexbox */
-            justify-content: space-between;
-            align-items: center;
-            /* Vertically center the items */
-            padding: 20px;
-            border: 5px;
-            font-size: 18px;
-            font-family: Arial, sans-serif;
-            margin-left: 0px;
+        .export-btn {
+            white-space: nowrap;
+            width: auto;
+            padding: 5px 10px;
         }
     </style>
 
