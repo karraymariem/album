@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 namespace Album\Model;
 
 use Laminas\Db\Adapter\AdapterInterface;
@@ -7,7 +8,7 @@ use Laminas\Db\TableGateway\TableGateway;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerInterface;
 
-class AlbumTableFactory implements FactoryInterface
+class AlbumControllerFactory implements FactoryInterface
 {
 
     public function __invoke(ContainerInterface $container, $requestedName, ?array $options = null): AlbumTable

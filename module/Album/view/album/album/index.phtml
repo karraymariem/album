@@ -1,4 +1,4 @@
-    <button> <a href="#" id="instructionLink">Instruction</a></button>
+    <button> <a id="instructionLink">Instruction</a></button>
 
     <div class="instruction-section" id="instructionSection">
         <div class="instruction-header">
@@ -10,10 +10,9 @@
 
                     Ajouter
                 </button>
-                <button class="update-btn">
-
-                    Actualiser
-                </button>
+                <form action="" method="get">
+                    <button type="submit">Actualiser</button>
+                </form>
                 <button class="export-btn">
 
                     Exporter Excel
@@ -39,7 +38,7 @@
                 </thead>
                 <tbody>
                     <?php foreach ($albums as $album): ?>
-                        <tr>
+                        <tr data-id="<?= htmlspecialchars($album->code) ?>">
                             <td><button class="voir-btn"><i class="fa fa-eye"></i></button></td>
                             <td><button class="edit-btn"><i class="fa fa-pencil"></i></button></td>
                             <td><button class="delete-btn"><i class="fa fa-trash"></i></button></td>
@@ -187,8 +186,8 @@
             background-color: #fefefe;
             padding: 20px;
             border: 1px solid #888;
-            width: 37%;
-            height: 75%;
+            width: 25%;
+            height: 50%;
             overflow-y: scroll;
             box-sizing: border-box;
         }
@@ -256,7 +255,9 @@
         .modal-buttons {
             display: flex;
             justify-content: space-between;
-            margin-left: 65%;
+            margin-left: 75%;
+            border-radius: 5px;
+
         }
 
         #checkbox-group {
@@ -268,6 +269,7 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
+            width: 95%;
         }
 
         #checkbox-group div {
@@ -341,12 +343,9 @@
 
 
     <script>
-        // Initially hide the instruction section
         document.getElementById("instructionSection").style.display = "none";
 
-        const dataTable = document
-            .getElementById("dataTable")
-            .getElementsByTagName("tbody")[0];
+        const dataTable = document.getElementById("dataTable").getElementsByTagName("tbody")[0];
         const myModal = document.getElementById("myModal");
         const modalTitle = document.getElementById("modalTitle");
         const addItemForm = document.getElementById("addItemForm");
@@ -355,167 +354,270 @@
         const instructionLink = document.getElementById("instructionLink");
         let editRow = null;
 
+        // Show instructions
+        instructionLink.addEventListener("click", () => {
+            document.getElementById("instructionSection").style.display = "block";
+        });
+
+        // Open modal for adding
         openModalBtn.addEventListener("click", () => {
             myModal.style.display = "flex";
             addItemForm.reset();
-            document.querySelector(
-                '.modal-buttons button[type="submit"]'
-            ).style.display = "block"; // Show Valider button
+            modalTitle.textContent = "Ajouter";
+            addItemForm.setAttribute("data-action", "add"); // Set action type to add
+            document.querySelector('.modal-buttons button[type="submit"]').style.display = "block";
+
+            // Enable inputs for adding
+            document.getElementById("code").disabled = false;
+            document.getElementById("designation").disabled = false;
+            document.getElementById("description").disabled = false;
         });
 
+        // Close modal
         closeModalBtn.addEventListener("click", () => {
             myModal.style.display = "none";
         });
 
+        // Open modal for editing
+        dataTable.addEventListener("click", (event) => {
+            if (event.target.closest(".edit-btn")) {
+                const row = event.target.closest("tr");
+                const cells = row.cells;
+
+                document.getElementById("code").value = cells[6].textContent;
+                document.getElementById("designation").value = cells[7].textContent;
+                document.getElementById("description").value = cells[9].textContent;
+
+                modalTitle.textContent = "Modifier";
+                myModal.style.display = "flex";
+
+                editRow = row;
+                addItemForm.setAttribute("data-action", "edit"); // Set action type to edit
+                addItemForm.setAttribute("data-id", row.getAttribute("data-id"));
+
+                // Enable inputs for editing
+                document.getElementById("code").disabled = false;
+                document.getElementById("designation").disabled = false;
+                document.getElementById("description").disabled = false;
+
+                // Ensure the submit button is visible when in "edit" mode
+                document.querySelector('.modal-buttons button[type="submit"]').style.display = "block";
+            }
+
+            if (event.target.closest(".voir-btn")) {
+                const row = event.target.closest("tr");
+                const cells = row.cells;
+
+                modalTitle.textContent = "Voir";
+                document.getElementById("code").value = cells[6].textContent;
+                document.getElementById("designation").value = cells[7].textContent;
+                document.getElementById("description").value = cells[9].textContent;
+
+                // Disable inputs for viewing only
+                document.getElementById("code").disabled = true;
+                document.getElementById("designation").disabled = true;
+                document.getElementById("description").disabled = true;
+
+                // Hide the submit button for "Voir"
+                document.querySelector('.modal-buttons button[type="submit"]').style.display = "none";
+
+                myModal.style.display = "flex";
+            }
+        });
+
+        // Form submit event
         addItemForm.addEventListener("submit", (e) => {
             e.preventDefault();
 
+            const action = addItemForm.getAttribute("data-action");
+            const albumId = addItemForm.getAttribute("data-id");
             const code = document.getElementById("code").value;
             const designation = document.getElementById("designation").value;
-            const post = document.getElementById("post").value;
             const description = document.getElementById("description").value;
 
-            if (editRow) {
-                // Update existing row if editRow is set
-                editRow.cells[6].textContent = code;
-                editRow.cells[7].textContent = designation;
-                editRow.cells[9].textContent = description;
+            if (action === "add") {
+                // Adding button
+                fetch("/album/add", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            action: "add",
+                            code,
+                            designation,
+                            description
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Instruction added successfully!");
 
-                // Reset the editRow after update
-                editRow = null;
-            } else {
-                // Add a new row
-                const newRow = dataTable.insertRow();
-                newRow.innerHTML = ` 
-    <td><button class="voir-btn"><i class="fa fa-eye"></i></button></td>
-    <td><button class="edit-btn"><i class="fa fa-pencil"></i></button></td>
-    <td><button class="delete-btn"><i class="fa fa-trash"></i></button></td>
-    <td><button class="immprimer-btn"><i class="fa fa-print"></i></button></td>
-    <td><button class="dupliquer-btn"><i class="fa fa-clone"></i></button></td>
-    <td><button > Details</button></td>
-    <td>${code}</td>
-    <td>${designation}</td>
-    <td></td>
-    <td>${description}</td>
-    `;
+                            const newRow = dataTable.insertRow();
+                            newRow.setAttribute("data-id", code);
+                            newRow.innerHTML = `
+                    <td><button class="voir-btn"><i class="fa fa-eye"></i></button></td>
+                    <td><button class="edit-btn"><i class="fa fa-pencil"></i></button></td>
+                    <td><button class="delete-btn"><i class="fa fa-trash"></i></button></td>
+                    <td><button class="immprimer-btn"><i class="fa fa-print"></i></button></td>
+                    <td><button class="dupliquer-btn"><i class="fa fa-clone"></i></button></td>
+                    <td><button>Details</button></td>
+                    <td>${code}</td>
+                    <td>${designation}</td>
+                    <td></td>
+                    <td>${description}</td>
+                    `;
 
-                newRow.querySelector(".delete-btn").addEventListener("click", () => {
-                    newRow.remove();
-                });
-
-                //EDIT BUTTON
-                newRow.querySelector(".edit-btn").addEventListener("click", () => {
-                    modalTitle.textContent = "Modifier";
-                    const cells = newRow.cells;
-                    document.getElementById("code").value = cells[6].textContent;
-                    document.getElementById("designation").value = cells[7].textContent;
-                    document.getElementById("description").value = cells[9].textContent;
-
-                    // Enable inputs for editing
-                    document.getElementById("code").disabled = false;
-                    document.getElementById("designation").disabled = false;
-                    document.getElementById("description").disabled = false;
-                    document.getElementById("post").disabled = false;
-
-                    document.querySelector(
-                        '.modal-buttons button[type="submit"]'
-                    ).style.display = "block"; // Show Valider button
-
-                    myModal.style.display = "flex";
-                    editRow = newRow; // Set the row for editing
-                });
-
-                // VOIR BUTTON
-                newRow.querySelector(".voir-btn").addEventListener("click", () => {
-                    modalTitle.textContent = "Voir";
-                    const cells = newRow.cells;
-                    document.getElementById("code").value = cells[6].textContent;
-                    document.getElementById("designation").value = cells[7].textContent;
-                    document.getElementById("description").value = cells[9].textContent;
-
-                    // Disable inputs for viewing only
-                    document.getElementById("code").disabled = true;
-                    document.getElementById("designation").disabled = true;
-                    document.getElementById("description").disabled = true;
-                    document.getElementById("post").disabled = true;
-
-                    // Hide the submit button for "Voir"
-                    document.querySelector(
-                        '.modal-buttons button[type="submit"]'
-                    ).style.display = "none";
-
-                    myModal.style.display = "flex";
-                });
-
-                // DUPLICATE BUTTON
-                newRow
-                    .querySelector(".dupliquer-btn")
-                    .addEventListener("click", () => {
-                        const clonedRow = newRow.cloneNode(true); // Clone the row
-                        dataTable.appendChild(clonedRow); // Append the cloned row to the table
-
-                        // You can add event listeners to the cloned buttons here if necessary
-                        clonedRow
-                            .querySelector(".delete-btn")
-                            .addEventListener("click", () => {
-                                clonedRow.remove();
-                            });
-
-                        clonedRow
-                            .querySelector(".edit-btn")
-                            .addEventListener("click", () => {
-                                modalTitle.textContent = "Modifier";
-                                const cells = clonedRow.cells;
-                                document.getElementById("code").value = cells[6].textContent;
-                                document.getElementById("designation").value =
-                                    cells[7].textContent;
-                                document.getElementById("description").value =
-                                    cells[9].textContent;
-
-                                // Enable inputs for editing
-                                document.getElementById("code").disabled = false;
-                                document.getElementById("designation").disabled = false;
-                                document.getElementById("description").disabled = false;
-                                document.getElementById("post").disabled = false;
-
-                                document.querySelector(
-                                    '.modal-buttons button[type="submit"]'
-                                ).style.display = "block"; // Show Valider button
-                                myModal.style.display = "block";
-                                editRow = clonedRow; // Set the row for editing
-                            });
-
-                        clonedRow
-                            .querySelector(".voir-btn")
-                            .addEventListener("click", () => {
+                            // Attach event listeners for new "Voir" button
+                            newRow.querySelector(".voir-btn").addEventListener("click", () => {
                                 modalTitle.textContent = "Voir";
-                                const cells = clonedRow.cells;
+                                const cells = newRow.cells;
                                 document.getElementById("code").value = cells[6].textContent;
-                                document.getElementById("designation").value =
-                                    cells[7].textContent;
-                                document.getElementById("description").value =
-                                    cells[9].textContent;
+                                document.getElementById("designation").value = cells[7].textContent;
+                                document.getElementById("description").value = cells[9].textContent;
 
                                 // Disable inputs for viewing only
                                 document.getElementById("code").disabled = true;
                                 document.getElementById("designation").disabled = true;
                                 document.getElementById("description").disabled = true;
-                                document.getElementById("post").disabled = true;
 
                                 // Hide the submit button for "Voir"
-                                document.querySelector(
-                                    '.modal-buttons button[type="submit"]'
-                                ).style.display = "none";
+                                document.querySelector('.modal-buttons button[type="submit"]').style.display = "none";
 
-                                myModal.style.display = "block"; // Open the modal
+                                myModal.style.display = "flex";
                             });
-                    });
+
+                            myModal.style.display = "none";
+                        } else {
+                            alert("Error adding instruction: " + data.message);
+                        }
+                    })
+                    .catch(error => alert("An error occurred while adding the instruction."));
             }
 
-            myModal.style.display = "none";
+            if (action === "edit" && albumId) {
+                // Editing instruction
+                fetch("/album/edit", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            action: "edit",
+                            code,
+                            designation,
+                            description
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Instruction updated successfully!");
+                            const cells = editRow.cells;
+                            cells[6].textContent = code;
+                            cells[7].textContent = designation;
+                            cells[9].textContent = description;
+                            myModal.style.display = "none";
+                        } else {
+                            alert("Error updating instruction: " + data.message);
+                        }
+                    })
+                    .catch(error => alert("An error occurred while updating the instruction."));
+            }
         });
+        // delete button 
+        document.getElementById("dataTable").addEventListener("click", (event) => {
+            // Check if the clicked target is a delete button
+            const deleteButton = event.target.closest(".delete-btn");
 
-        instructionLink.addEventListener("click", () => {
-            document.getElementById("instructionSection").style.display = "block";
+            if (deleteButton) {
+                const row = deleteButton.closest("tr"); // Get the row that the delete button is in
+                const code = row.getAttribute("data-id");
+
+                console.log("Delete button clicked for album code:", code);
+
+                if (!code) {
+                    alert("Album code is missing!");
+                    return; // Exit if no code is found
+                }
+
+                if (confirm("Do you want to delete the album?")) {
+                    fetch("/album/delete", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                action: "delete",
+                                code: code // Send the album code
+                            })
+                        })
+                        .then(response => {
+                            console.log("Delete response status:", response.status);
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log("Delete response:", data);
+
+                            if (data.success) {
+                                alert("Album deleted successfully!");
+                                row.remove(); // Remove the row from the table
+                            } else {
+                                alert("An error occurred during deletion: " + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error during deletion:", error);
+                            alert("An error occurred during deletion.");
+                        });
+                }
+            }
+        });
+        // Duplicate button
+        dataTable.addEventListener("click", (event) => {
+            if (event.target.closest(".dupliquer-btn")) {
+                const row = event.target.closest("tr");
+                const code = row.getAttribute("data-id"); // Get the album code
+
+                if (!code) {
+                    alert("Album code is missing!");
+                    return; // Exit if there is no code 
+                }
+
+                fetch("/album/duplicate", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            code: code // Send the album code to duplicate
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Album duplicated successfully!");
+
+                            const newRow = dataTable.insertRow();
+                            newRow.setAttribute("data-id", data.newCode);
+                            newRow.innerHTML = `
+                        <td><button class="voir-btn"><i class="fa fa-eye"></i></button></td>
+                        <td><button class="edit-btn"><i class="fa fa-pencil"></i></button></td>
+                        <td><button class="delete-btn"><i class="fa fa-trash"></i></button></td>
+                        <td><button class="immprimer-btn"><i class="fa fa-print"></i></button></td>
+                        <td><button class="dupliquer-btn"><i class="fa fa-clone"></i></button></td>
+                        <td><button>Details</button></td>
+                        <td>${data.newCode}</td>
+                        <td>${data.newDesignation}</td>
+                        <td></td>
+                        <td>${data.newDescription}</td>
+                    `;
+                        } else {
+                            alert("Error duplicating album: " + data.message);
+                        }
+                    })
+                    .catch(error => alert("An error occurred while duplicating the album."));
+            }
         });
     </script>

@@ -35,20 +35,65 @@ return [
                 ],
 
             ],
+            'album_ajax' => [
+                'type'    => 'Literal',
+                'options' => [
+                    'route'    => '/album/add',
+                    'defaults' => [
+                        'controller' => AlbumController::class,
+                        'action'     => 'add',
+                    ],
+                ],
+            ],
+
+            'album_edit' => [
+                'type'    => 'Literal',
+                'options' => [
+                    'route'    => '/album/edit',
+                    'defaults' => [
+                        'controller' => AlbumController::class,
+                        'action'     => 'edit',
+                    ],
+                ],
+            ],
+
+            'album_delete' => [
+                'type'    => 'Literal',
+                'options' => [
+                    'route'    => '/album/delete',
+                    'defaults' => [
+                        'controller' => AlbumController::class,
+                        'action'     => 'delete',
+                    ],
+                ],
+            ],
+            'album_duplicate' => [
+                'type'    => 'Literal',
+                'options' => [
+                    'route'    => '/album/duplicate',
+                    'defaults' => [
+                        'controller' => AlbumController::class,
+                        'action'     => 'duplicate',
+                    ],
+                ],
+            ],
+
         ],
     ],
 
-    // View configuration
+
     'view_manager' => [
         'template_path_stack' => [
             'album' => __DIR__ . '/../view',
         ],
     ],
 
-    // Service manager configuration
+
     'service_manager' => [
         'factories' => [
             AlbumTable::class => AlbumTableFactory::class,
+
         ],
+
     ],
 ];

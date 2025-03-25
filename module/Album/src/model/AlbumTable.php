@@ -19,34 +19,77 @@ class AlbumTable
         return $this->tableGateway->select();
     }
 
-    // Fetch a single album by its code
-    public function getAlbum($code)
+    public function saveAlbum($code, $designation, $description)
     {
-        $result = $this->tableGateway->select(['code' => $code]);
-        return $result->current();
-    }
-
-    // Insert a new album
-    public function saveAlbum($data)
-    {
-        $albumData = [
-            'code' => $data['code'],
-            'designation' => $data['designation'],
-            'cadence' => $data['cadence'],
-            'description' => $data['description']
+        $data = [
+            'code' => $code,
+            'designation' => $designation,
+            'description' => $description,
         ];
 
+        error_log(print_r($data, true));
+        return $this->tableGateway->insert($data);
+    }
+
+    public function getAlbumByCode($code)
+    {
+        $rowset = $this->tableGateway->select(['code' => $code]);
+        return $rowset->current();
+    }
+
+    public function updateAlbumByCode($code, $designation, $description)
+    {
+        return $this->tableGateway->update(
+            ['designation' => $designation, 'description' => $description],
+            ['code' => $code]
+        );
+    }
+
+    public function deleteAlbumByCode($code)
+    {
+        return $this->tableGateway->delete(['code' => $code]);
+    }
+
+    // Delete an album
+    public function deleteAlbum($code)
+    {
         try {
-            $this->tableGateway->insert($albumData);
+            $where = ['code' => $code];
+            $result = $this->tableGateway->delete($where);
+
+            if ($result === 0) {
+                throw new \Exception("No album found with the code: " . $code);
+            }
+
+            return true;
         } catch (\Exception $e) {
-            throw new \RuntimeException('Failed to insert album: ' . $e->getMessage());
+            error_log('Error deleting album: ' . $e->getMessage());
+            return false;
         }
     }
 
-
-    // Delete an album by its code
-    public function deleteAlbum($code)
+    // Duplicate an album
+    public function duplicateAlbum($code)
     {
-        $this->tableGateway->delete(['code' => $code]);
+        // Fetch the album by code
+        $result = $this->tableGateway->select(['code' => $code]);
+        $album = $result->current();
+
+        // Check if album exists
+        if (!$album) {
+            throw new \Exception("Album with code $code not found");
+        }
+        $newCode = $album->code . '_copie';
+
+        // Prepare the data for the new duplicated album
+        $data = [
+            'code' => $newCode,            // New unique code
+            'designation' => $album->designation,
+            'cadence' => $album->cadence,
+            'description' => $album->description
+        ];
+
+        // Insert the duplicated album into the database
+        return $this->tableGateway->insert($data);
     }
 }
